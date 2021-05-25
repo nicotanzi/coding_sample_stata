@@ -10,15 +10,15 @@ as well as the code itself.
 ```
 * WorkingDirectory
 cd "your-directory"
-* Log-File
-log using registro, replace
 * Packages
 *net install grc1leg, from(http://www.stata.com/users/vwiggins) /* many graphs, one legend */
 * Load data
-use russia, clear
+clear all
+use russia
 ```
 ```s/
     quietly cd "D:\Trabajo\Coding Sample\coding_sample_stata\cross_section"
+    quietly clear all
     quietly use russia, clear
 ```
 
@@ -31,15 +31,13 @@ Among different variables we've got these:
 ```
 
 I'm curious about satisfaction with life.
-
-Does marital status plays a role? Does gender?
-
+Does marital status have relation with it? Does gender?
 Let's do some plots
 
 ```
 egen temp = rowtotal(marsta*)
 gen marsta0 = 1-temp
-label variable marsta0 "Forever alone" /* XD */
+label variable marsta0 "Forever alone"
 drop temp
 ```
 ```s/
@@ -62,16 +60,16 @@ grc1leg `r(list)', l1(Density) legendfrom(H_1)
 graph close H_*
 ```
 ```s/
-    forvalues k = 0(1)4{
-    local titulo : variable label marsta`k'
-    twoway (histogram satlif if gender==1 & marsta`k'==1, bin(5) color(red%30)) ///        
+    quietly forvalues k = 0(1)4{
+    quietly local titulo : variable label marsta`k'
+    quietly twoway (histogram satlif if gender==1 & marsta`k'==1, bin(5) color(red%30)) ///        
           (histogram satlif if gender==0 & marsta`k'==1, bin(5) color(green%30)), ///   
             name(H_`k') title("`titulo'") legend(order(1 "Male" 2 "Female" ))
     }
     quietly graph dir H_*
-    grc1leg `r(list)', l1(Density) legendfrom(H_1)
+    quietly grc1leg `r(list)', l1(Density) legendfrom(H_1)
     quietly graph export multi_hist.png, width(500) replace
-    graph close H_*
+    quietly graph close H_*
 ```
 
 ![Multiple overlayed histograms](multi_hist.png)
@@ -97,9 +95,9 @@ foreach v of varlist `r(varlist)' {
 ```
 ```s/
     quietly ds hhpres, not
-    foreach v of varlist `r(varlist)' {
+    quietly foreach v of varlist `r(varlist)' {
 	     quietly ttest `v', by(hhpres)
-	      if r(p)<0.01 {
+	      quietly if r(p)<0.01 {
 		        display "`: var label `v''"
 	      }
     }
@@ -122,8 +120,8 @@ reg totexp monage
 Let's do bad things and over-fit the regression using a polynomial. In fact,
 let's see how R^2 changes while the degree of the polynomial rises.
 ```
-matrix mat_r = J(10,2,.)
-forvalues k = 1(1)10{
+quietly matrix mat_r = J(10,2,.)
+quietly forvalues k = 1(1)10{
 	quietly gen monage_`k' = monage^`k'
 	quietly ds monage_*
 	quietly reg totexp `r(varlist)'
@@ -133,7 +131,7 @@ forvalues k = 1(1)10{
 ```
 ```s/
     quietly matrix mat_r = J(10,2,.)
-    forvalues k = 1(1)10{
+    quietly forvalues k = 1(1)10{
 	     quietly gen monage_`k' = monage^`k'
 	     quietly ds monage_*
 	     quietly reg totexp `r(varlist)'
@@ -167,9 +165,3 @@ To be continued...
 
 
 ## CLUSTERED STANDARD ERRORS
-
-
-
-```
-log close
-```

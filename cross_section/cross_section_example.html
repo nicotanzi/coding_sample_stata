@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Nicolás Tanzi" />
+  <title>Cross Section Coding Sample in STATA</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      word-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+<style>
+/* CSS for Markstat 2.0 using Pandoc 2.0 */
+body{padding:14px 28px;}
+body, table {font-family: Helvetica, Arial, Sans-serif; font-size: 14px;}
+h1, h2, h3, h4 {font-weight: normal; color: #3366cc}
+h1 {font-size: 200%;}
+h2 {font-size: 150%;}
+h3 {font-size: 120%;}
+h4 {font-size: 100%; font-weight:bold}
+img.center {display:block; margin-left:auto; margin-right:auto}
+.small{font-size:8pt;}
+a {color: black;}
+a:visited {color: #808080;}
+a.plain {text-decoration:none;}
+a.plain:hover {text-decoration:underline;}
+.em {font-weight:bold;}
+pre, code {font-family: "lucida console", monospace;}
+pre.stata {font-size:13px; line-height:13px;}
+pre {padding:8px; border:1px solid #c0c0c0; border-radius:8px; background-color:#fdfdfd;}
+code {color:#3366cc; background-color:#fafafa;white-space: pre;}
+pre code { color:black; background-color:white}
+/* Added for Pandoc */
+figure > img, div.figure > img {display:block; margin:auto}
+figcaption, p.caption {text-align:center; font-weight:bold; color:#3366cc;}
+h1.title {text-align:center; margin-bottom:0}
+p.author, h2.author {font-style:italic; text-align:center;margin-top:4px;margin-bottom:0}
+p.date, h3.date {text-align:center;margin-top:4px; margin-bottom:0}
+/* Tables*/
+table { margin:auto; border-collapse:collapse; }
+table caption { margin-bottom:1ex;}
+th, td { padding:4px 6px;}
+thead tr:first-child th {border-top:1px solid black; padding-top:6px}
+thead tr:last-child  th {padding-bottom:6px}
+tbody tr:first-child td {border-top:1px solid black; padding-top:6px}
+tbody tr:last-child  td {padding-bottom:6px;}
+table tbody:last-child tr:last-child td {border-bottom:1px solid black;}
+</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Cross Section Coding Sample in STATA</h1>
+<p class="author">Nicolás Tanzi</p>
+<p class="date">25 May 2021</p>
+</header>
+<p>First, a typical set up. You can dowload the data from <a href="https://github.com/nicotanzi/coding_sample_stata/tree/main/cross_section">here</a>, as well as the code itself.</p>
+<pre><code>* WorkingDirectory
+cd &quot;your-directory&quot;
+* Packages
+*net install grc1leg, from(http://www.stata.com/users/vwiggins) /* many graphs, one legend */
+* Load data
+clear all
+use russia</code></pre>
+
+<h2 id="a-little-bit-of-loops-macro-usage-and-graphics">A LITTLE BIT OF LOOPS, MACRO USAGE AND GRAPHICS</h2>
+<p>Among different variables we’ve got these:</p>
+<pre class='stata'>.   describe satlif marsta* gender
+
+              storage   display    value
+variable name   type    format     label      variable label
+─────────────────────────────────────────────────────────────────────────────
+satlif          double  %10.0g                Satisfaction with Life
+marsta1         float   %9.0g                 Married
+marsta2         float   %9.0g                 Living Together
+marsta3         float   %9.0g                 Divorced
+marsta4         float   %9.0g                 Widowed
+gender          double  %10.0g                Male
+</pre>
+<p>I’m curious about satisfaction with life. Does marital status have relation with it? Does gender? Let’s do some plots</p>
+<pre><code>egen temp = rowtotal(marsta*)
+gen marsta0 = 1-temp
+label variable marsta0 &quot;Forever alone&quot;
+drop temp</code></pre>
+
+<p>Now a cool loop</p>
+<pre><code>forvalues k = 0(1)4{
+  local titulo : variable label marsta`k&#39;
+  twoway (histogram satlif if gender==1 &amp; marsta`k&#39;==1, bin(5) color(red%30)) ///
+       (histogram satlif if gender==0 &amp; marsta`k&#39;==1, bin(5) color(green%30)), ///
+        name(H_`k&#39;) title(&quot;`titulo&#39;&quot;) legend(order(1 &quot;Male&quot; 2 &quot;Female&quot; ))
+}
+quietly graph dir H_*
+grc1leg `r(list)&#39;, l1(Density) legendfrom(H_1)
+graph close H_*</code></pre>
+
+<figure>
+<img src="multi_hist.png" alt="Multiple overlayed histograms" /><figcaption aria-hidden="true">Multiple overlayed histograms</figcaption>
+</figure>
+<p>It looks interesting…</p>
+<p>Another interesting looking thing, is the variable:</p>
+<pre class='stata'>. describe hhpres
+
+              storage   display    value
+variable name   type    format     label      variable label
+─────────────────────────────────────────────────────────────────────────────
+hhpres          double  %10.0g                Others Present at Interview
+</pre>
+<p>Does it have a relationship with any variable?</p>
+<p>Let’s see:</p>
+<pre><code>ds hhpres, not
+foreach v of varlist `r(varlist)&#39; {
+    quietly ttest `v&#39;, by(hhpres)
+    if r(p)&lt;0.01 {
+        display &quot;`: var label `v&#39;&#39;&quot;
+    }
+}</code></pre>
+
+<h2 id="some-code-lines-with-the-good-old-ols">SOME CODE LINES WITH THE GOOD OLD OLS</h2>
+<p>Suppose that we want to explain a continuous variable using another continuous variable, so we don’t have many options:</p>
+<pre class='stata'>. describe totexp monage htself tincm_r
+
+              storage   display    value
+variable name   type    format     label      variable label
+─────────────────────────────────────────────────────────────────────────────
+totexpr         double  %10.0g                HH Expenditures Real
+monage          double  %10.0g                Age (in months)
+htself          double  %10.0g                Self-reported Height
+tincm_r         double  %10.0g                HH Income Real
+</pre>
+<pre><code>reg totexp monage</code></pre>
+<pre class='stata'>      Source │       SS           df       MS      Number of obs   =     2,44
+
+─────────────┼──────────────────────────────────   F(1, 2445)      =     86.4
+
+       Model │  6.5927e+09         1  6.5927e+09   Prob > F        =    0.000
+
+    Residual │  1.8652e+11     2,445  76284541.1   R-squared       =    0.034
+
+─────────────┼──────────────────────────────────   Adj R-squared   =    0.033
+
+       Total │  1.9311e+11     2,446  78948635.7   Root MSE        =    8734.
+
+─────────────┬───────────────────────────────────────────────────────────────
+-
+     totexpr │      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval
+
+─────────────┼───────────────────────────────────────────────────────────────
+-
+      monage │  -7.666014    .824627    -9.30   0.000    -9.283053   -6.04897
+
+       _cons │   11921.72   491.9559    24.23   0.000     10957.03    12886.4
+
+─────────────┴───────────────────────────────────────────────────────────────
+-
+</pre>
+<p>Let’s do bad things and over-fit the regression using a polynomial. In fact, let’s see how R^2 changes while the degree of the polynomial rises.</p>
+<pre><code>quietly matrix mat_r = J(10,2,.)
+quietly forvalues k = 1(1)10{
+    quietly gen monage_`k&#39; = monage^`k&#39;
+    quietly ds monage_*
+    quietly reg totexp `r(varlist)&#39;
+    quietly matrix mat_r[`k&#39;,2] = e(r2)
+    quietly matrix mat_r[`k&#39;,1] = `k&#39;
+}</code></pre>
+
+<pre><code>drop _all
+svmat double mat_r
+matrix drop mat_r
+twoway connected mat_r2 mat_r1, ytitle(&quot;R{sup:2}&quot;) xtitle(&quot;Polynomial degree&quot;)
+use russia, clear</code></pre>
+
+<figure>
+<img src="R2.png" alt="Over-fitting and R^2" /><figcaption aria-hidden="true">Over-fitting and <span class="math inline"><em>R</em><sup>2</sup></span></figcaption>
+</figure>
+<p>To be continued…</p>
+<h2 id="logit-and-probit">LOGIT AND PROBIT</h2>
+<h2 id="clustered-standard-errors">CLUSTERED STANDARD ERRORS</h2>
+</body>
+</html>

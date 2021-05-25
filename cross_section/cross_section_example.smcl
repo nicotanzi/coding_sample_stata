@@ -3,7 +3,7 @@
       name:  {res}<unnamed>
        {txt}log:  {res}D:\Trabajo\Coding Sample\coding_sample_stata\cross_section\cross_section_example.smcl
   {txt}log type:  {res}smcl
- {txt}opened on:  {res}25 May 2021, 06:12:37
+ {txt}opened on:  {res}25 May 2021, 17:02:52
 {txt}
 {com}. //_1
 . display c(current_date)
@@ -11,6 +11,8 @@
 {txt}
 {com}. //_2q
 . quietly cd "D:\Trabajo\Coding Sample\coding_sample_stata\cross_section"
+{txt}
+{com}. quietly clear all
 {txt}
 {com}. quietly use russia, clear
 {txt}
@@ -37,20 +39,15 @@ variable name   type    format     label      variable label
 {com}. quietly drop temp
 {txt}
 {com}. //_5q
-. forvalues k = 0(1)4{c -(}
-{txt}  2{com}. local titulo : variable label marsta`k'
-{txt}  3{com}. twoway (histogram satlif if gender==1 & marsta`k'==1, bin(5) color(red%30)) ///        
->       (histogram satlif if gender==0 & marsta`k'==1, bin(5) color(green%30)), ///   
->         name(H_`k') title("`titulo'") legend(order(1 "Male" 2 "Female" ))
-{txt}  4{com}. {c )-}
-{res}{txt}
+. quietly forvalues k = 0(1)4{c -(}
+{txt}
 {com}. quietly graph dir H_*
 {txt}
-{com}. grc1leg `r(list)', l1(Density) legendfrom(H_1)
-{res}{txt}
+{com}. quietly grc1leg `r(list)', l1(Density) legendfrom(H_1)
+{txt}
 {com}. quietly graph export multi_hist.png, width(500) replace
 {txt}
-{com}. graph close H_*
+{com}. quietly graph close H_*
 {txt}
 {com}. //_6
 . describe hhpres
@@ -63,25 +60,7 @@ variable name   type    format     label      variable label
 {com}. //_7q
 . quietly ds hhpres, not
 {txt}
-{com}. foreach v of varlist `r(varlist)' {c -(}
-{txt}  2{com}.      quietly ttest `v', by(hhpres)
-{txt}  3{com}.       if r(p)<0.01 {c -(}
-{txt}  4{com}.             display "`: var label `v''"
-{txt}  5{com}.       {c )-}
-{txt}  6{com}. {c )-}
-Site
-Male
-Age (in months)
-Health Prob last 30 days
-Self-reported Height
-Ever Had Heart Attack
-Smokes
-Height
-HH Income Real
-Geographic Area
-Married
-Divorced
-Widowed
+{com}. quietly foreach v of varlist `r(varlist)' {c -(}
 {txt}
 {com}. //_8
 . describe totexp monage htself tincm_r
@@ -114,13 +93,7 @@ variable name   type    format     label      variable label
 {com}. //_10q
 . quietly matrix mat_r = J(10,2,.)
 {txt}
-{com}. forvalues k = 1(1)10{c -(}
-{txt}  2{com}.      quietly gen monage_`k' = monage^`k'
-{txt}  3{com}.      quietly ds monage_*
-{txt}  4{com}.      quietly reg totexp `r(varlist)'
-{txt}  5{com}.      quietly matrix mat_r[`k',2] = e(r2)
-{txt}  6{com}.      quietly matrix mat_r[`k',1] = `k'
-{txt}  7{com}. {c )-}
+{com}. quietly forvalues k = 1(1)10{c -(}
 {txt}
 {com}. //_11q
 . quietly drop _all
@@ -140,7 +113,7 @@ variable name   type    format     label      variable label
       {txt}name:  {res}<unnamed>
        {txt}log:  {res}D:\Trabajo\Coding Sample\coding_sample_stata\cross_section\cross_section_example.smcl
   {txt}log type:  {res}smcl
- {txt}closed on:  {res}25 May 2021, 06:12:47
+ {txt}closed on:  {res}25 May 2021, 17:03:12
 {txt}{.-}
 {smcl}
 {txt}{sf}{ul off}
