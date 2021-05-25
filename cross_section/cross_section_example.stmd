@@ -1,9 +1,7 @@
-% Time Series Coding Sample in STATA
+% Cross Section Coding Sample in STATA
 % Nicolás Tanzi
 % `s c(current_date)`
 
-Cross Section Example
-=====================
 
 First, a typical set up. You can dowload the data from
 [here](https://github.com/nicotanzi/coding_sample_stata/tree/main/cross_section),

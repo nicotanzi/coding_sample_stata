@@ -3,7 +3,7 @@
       name:  {res}<unnamed>
        {txt}log:  {res}D:\Trabajo\Coding Sample\coding_sample_stata\cross_section\cross_section_example.smcl
   {txt}log type:  {res}smcl
- {txt}opened on:  {res}25 May 2021, 05:56:20
+ {txt}opened on:  {res}25 May 2021, 06:12:37
 {txt}
 {com}. //_1
 . display c(current_date)
@@ -140,7 +140,7 @@ variable name   type    format     label      variable label
       {txt}name:  {res}<unnamed>
        {txt}log:  {res}D:\Trabajo\Coding Sample\coding_sample_stata\cross_section\cross_section_example.smcl
   {txt}log type:  {res}smcl
- {txt}closed on:  {res}25 May 2021, 05:56:28
+ {txt}closed on:  {res}25 May 2021, 06:12:47
 {txt}{.-}
 {smcl}
 {txt}{sf}{ul off}
