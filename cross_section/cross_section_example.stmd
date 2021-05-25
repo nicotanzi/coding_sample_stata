@@ -1,0 +1,109 @@
+% Time Series Coding Sample in STATA
+% Nicolás Tanzi
+% `s c(current_date)`
+
+Soy price
+=========
+A non-rigorous example
+----------------------
+
+We begin by importing the data we are goin to use. You can dowload the
+data from [here](https://github.com/nicotanzi/coding_sample_stata/blob/main/time_series/psoy.csv).
+
+```
+clear all
+import delimited "folder-containing-the-file\psoy.csv"
+```
+
+We must add a month variable, and give time series format
+
+```
+gen month=monthly(mes,"YM")
+format month %tm
+tsset month
+```
+```s/
+    quietly clear all
+    quietly import delimited "D:\Estudio\UdeSA\Materias Cursadas\Series de Tiempo\Clase 1\STATA\psoy.csv"
+    quietly gen month=monthly(mes,"YM")
+    quietly format month %tm
+    quietly tsset month
+```
+
+Let's plot our data
+
+```
+tsline psoy
+```
+```s/
+    quietly tsline psoy
+    quietly graph export psoy.png, width(500) replace
+```
+
+![Soy spot price in Chicago (USD/MT)](psoy.png)
+
+The above time series si not stationary at all. So we apply logaritmic difference:
+```
+gen lns=ln(psoy)
+gen dlns=D.lns
+tsline dlns
+```
+```s/
+    quietly gen lns=ln(psoy)
+    quietly gen dlns=D.lns
+    quietly tsline dlns
+    quietly graph export dlns.png, width(500) replace
+```
+![$\Delta$ln(psoy)](dlns.png)
+
+Is it auto correlated?
+```
+corrgram dlns, lags(12)
+ac dlns, lags(12)
+pac dlns, lags(12)
+```
+```s/
+    quietly corrgram dlns, lags(12)
+    quietly ac dlns, lags(12)
+    quietly graph export ac.png, width(500) replace
+    quietly pac dlns, lags(12)
+    quietly graph export pac.png, width(500) replace
+```
+![Correlogram (autocorrelation) of $\Delta$ln(psoy)](ac.png)
+
+![Correlograms(partial auto correlation) of $\Delta$ln(psoy)](pac.png)
+
+Let's try to estimate an $AR(1)$
+```
+arima dlns, ar(1)
+```
+```s/
+    arima dlns, ar(1)
+```
+
+Are its residuals white noise?
+```
+predict resid_ar1, resid
+wntestq resid_ar1
+```
+```s/
+    quietly predict resid_ar1, resid
+```
+```s/
+    wntestq resid_ar1
+```
+
+Let's se visually how acurate are the fitted values
+```
+predict dlns_ar1
+tsline dlns dlns_ar1
+```
+```s/
+    quietly predict dlns_ar1
+    quietly tsline dlns dlns_ar1
+    quietly graph export dlns_ar1.png, width(500) replace
+```
+![Observed vs Fitted](dlns_ar1.png)
+
+This code is just an example, in order to developed a
+better model one should follow the Box-Jenknis method.
