@@ -1,5 +1,5 @@
 whereis pandoc "C:\Users\Usuario\AppData\Local\Pandoc\pandoc.exe"
 
-cd "D:\Estudio\UdeSA\Materias Cursadas\Series de Tiempo\Clase 1\STATA\"
+cd "D:\Trabajo\Coding Sample\coding_sample_stata\cross_section"
 
-markstat using time_series_example
+markstat using cross_section_example

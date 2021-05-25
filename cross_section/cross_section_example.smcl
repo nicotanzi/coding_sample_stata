@@ -1,0 +1,146 @@
+{smcl}
+{com}{sf}{ul off}{txt}{.-}
+      name:  {res}<unnamed>
+       {txt}log:  {res}D:\Trabajo\Coding Sample\coding_sample_stata\cross_section\cross_section_example.smcl
+  {txt}log type:  {res}smcl
+ {txt}opened on:  {res}25 May 2021, 05:56:20
+{txt}
+{com}. //_1
+. display c(current_date)
+{res}25 May 2021
+{txt}
+{com}. //_2q
+. quietly cd "D:\Trabajo\Coding Sample\coding_sample_stata\cross_section"
+{txt}
+{com}. quietly use russia, clear
+{txt}
+{com}. //_3
+.   describe satlif marsta* gender
+
+              {txt}storage   display    value
+variable name   type    format     label      variable label
+{hline}
+{p 0 48}{res}{bind:satlif         }{txt}{bind: double  }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}Satisfaction with Life{p_end}
+{p 0 48}{bind:marsta1        }{txt}{bind: float   }{bind:{txt}%9.0g     }{space 1}{bind:         }{bind:  }{res}{res}Married{p_end}
+{p 0 48}{bind:marsta2        }{txt}{bind: float   }{bind:{txt}%9.0g     }{space 1}{bind:         }{bind:  }{res}{res}Living Together{p_end}
+{p 0 48}{bind:marsta3        }{txt}{bind: float   }{bind:{txt}%9.0g     }{space 1}{bind:         }{bind:  }{res}{res}Divorced{p_end}
+{p 0 48}{bind:marsta4        }{txt}{bind: float   }{bind:{txt}%9.0g     }{space 1}{bind:         }{bind:  }{res}{res}Widowed{p_end}
+{p 0 48}{bind:gender         }{txt}{bind: double  }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}Male{p_end}
+{txt}
+{com}. //_4q
+. quietly egen temp = rowtotal(marsta*)
+{txt}
+{com}. quietly gen marsta0 = 1-temp
+{txt}
+{com}. quietly label variable marsta0 "Forever alone" /* XD */
+{txt}
+{com}. quietly drop temp
+{txt}
+{com}. //_5q
+. forvalues k = 0(1)4{c -(}
+{txt}  2{com}. local titulo : variable label marsta`k'
+{txt}  3{com}. twoway (histogram satlif if gender==1 & marsta`k'==1, bin(5) color(red%30)) ///        
+>       (histogram satlif if gender==0 & marsta`k'==1, bin(5) color(green%30)), ///   
+>         name(H_`k') title("`titulo'") legend(order(1 "Male" 2 "Female" ))
+{txt}  4{com}. {c )-}
+{res}{txt}
+{com}. quietly graph dir H_*
+{txt}
+{com}. grc1leg `r(list)', l1(Density) legendfrom(H_1)
+{res}{txt}
+{com}. quietly graph export multi_hist.png, width(500) replace
+{txt}
+{com}. graph close H_*
+{txt}
+{com}. //_6
+. describe hhpres
+
+              {txt}storage   display    value
+variable name   type    format     label      variable label
+{hline}
+{p 0 48}{res}{bind:hhpres         }{txt}{bind: double  }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}Others Present at Interview{p_end}
+{txt}
+{com}. //_7q
+. quietly ds hhpres, not
+{txt}
+{com}. foreach v of varlist `r(varlist)' {c -(}
+{txt}  2{com}.      quietly ttest `v', by(hhpres)
+{txt}  3{com}.       if r(p)<0.01 {c -(}
+{txt}  4{com}.             display "`: var label `v''"
+{txt}  5{com}.       {c )-}
+{txt}  6{com}. {c )-}
+Site
+Male
+Age (in months)
+Health Prob last 30 days
+Self-reported Height
+Ever Had Heart Attack
+Smokes
+Height
+HH Income Real
+Geographic Area
+Married
+Divorced
+Widowed
+{txt}
+{com}. //_8
+. describe totexp monage htself tincm_r
+
+              {txt}storage   display    value
+variable name   type    format     label      variable label
+{hline}
+{p 0 48}{res}{bind:totexpr        }{txt}{bind: double  }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}HH Expenditures Real{p_end}
+{p 0 48}{bind:monage         }{txt}{bind: double  }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}Age (in months){p_end}
+{p 0 48}{bind:htself         }{txt}{bind: double  }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}Self-reported Height{p_end}
+{p 0 48}{bind:tincm_r        }{txt}{bind: double  }{bind:{txt}%10.0g    }{space 1}{bind:         }{bind:  }{res}{res}HH Income Real{p_end}
+{txt}
+{com}. //_9q
+. reg totexp monage
+
+{txt}      Source {c |}       SS           df       MS      Number of obs   ={res}     2,447
+{txt}{hline 13}{c +}{hline 34}   F(1, 2445)      = {res}    86.42
+{txt}       Model {c |} {res} 6.5927e+09         1  6.5927e+09   {txt}Prob > F        ={res}    0.0000
+{txt}    Residual {c |} {res} 1.8652e+11     2,445  76284541.1   {txt}R-squared       ={res}    0.0341
+{txt}{hline 13}{c +}{hline 34}   Adj R-squared   ={res}    0.0337
+{txt}       Total {c |} {res} 1.9311e+11     2,446  78948635.7   {txt}Root MSE        =   {res} 8734.1
+
+{txt}{hline 13}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 1}     totexpr{col 14}{c |}      Coef.{col 26}   Std. Err.{col 38}      t{col 46}   P>|t|{col 54}     [95% Con{col 67}f. Interval]
+{hline 13}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 6}monage {c |}{col 14}{res}{space 2}-7.666014{col 26}{space 2}  .824627{col 37}{space 1}   -9.30{col 46}{space 3}0.000{col 54}{space 4}-9.283053{col 67}{space 3}-6.048974
+{txt}{space 7}_cons {c |}{col 14}{res}{space 2} 11921.72{col 26}{space 2} 491.9559{col 37}{space 1}   24.23{col 46}{space 3}0.000{col 54}{space 4} 10957.03{col 67}{space 3} 12886.41
+{txt}{hline 13}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}{txt}
+{com}. //_10q
+. quietly matrix mat_r = J(10,2,.)
+{txt}
+{com}. forvalues k = 1(1)10{c -(}
+{txt}  2{com}.      quietly gen monage_`k' = monage^`k'
+{txt}  3{com}.      quietly ds monage_*
+{txt}  4{com}.      quietly reg totexp `r(varlist)'
+{txt}  5{com}.      quietly matrix mat_r[`k',2] = e(r2)
+{txt}  6{com}.      quietly matrix mat_r[`k',1] = `k'
+{txt}  7{com}. {c )-}
+{txt}
+{com}. //_11q
+. quietly drop _all
+{txt}
+{com}. quietly svmat double mat_r
+{txt}
+{com}. quietly matrix drop mat_r
+{txt}
+{com}. quietly twoway connected mat_r2 mat_r1, ytitle("R{c -(}sup:2{c )-}") xtitle("Polynomial degree")
+{txt}
+{com}. quietly graph export R2.png, width(500) replace
+{txt}
+{com}. quietly use russia, clear
+{txt}
+{com}. //_^
+. log close
+      {txt}name:  {res}<unnamed>
+       {txt}log:  {res}D:\Trabajo\Coding Sample\coding_sample_stata\cross_section\cross_section_example.smcl
+  {txt}log type:  {res}smcl
+ {txt}closed on:  {res}25 May 2021, 05:56:28
+{txt}{.-}
+{smcl}
+{txt}{sf}{ul off}

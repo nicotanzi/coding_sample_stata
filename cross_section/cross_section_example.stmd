@@ -2,108 +2,176 @@
 % Nicolás Tanzi
 % `s c(current_date)`
 
-Soy price
-=========
-A non-rigorous example
-----------------------
+Cross Section Example
+=====================
 
-We begin by importing the data we are goin to use. You can dowload the
-data from [here](https://github.com/nicotanzi/coding_sample_stata/blob/main/time_series/psoy.csv).
-
-```
-clear all
-import delimited "folder-containing-the-file\psoy.csv"
-```
-
-We must add a month variable, and give time series format
+First, a typical set up. You can dowload the data from
+[here](https://github.com/nicotanzi/coding_sample_stata/tree/main/cross_section),
+as well as the code itself.
 
 ```
-gen month=monthly(mes,"YM")
-format month %tm
-tsset month
+* WorkingDirectory
+cd "your-directory"
+* Log-File
+log using registro, replace
+* Packages
+*net install grc1leg, from(http://www.stata.com/users/vwiggins) /* many graphs, one legend */
+* Load data
+use russia, clear
 ```
 ```s/
-    quietly clear all
-    quietly import delimited "D:\Estudio\UdeSA\Materias Cursadas\Series de Tiempo\Clase 1\STATA\psoy.csv"
-    quietly gen month=monthly(mes,"YM")
-    quietly format month %tm
-    quietly tsset month
+    quietly cd "D:\Trabajo\Coding Sample\coding_sample_stata\cross_section"
+    quietly use russia, clear
 ```
 
-Let's plot our data
+## A LITTLE BIT OF LOOPS, MACRO USAGE AND GRAPHICS
+
+Among different variables we've got these:
+
+```s
+  describe satlif marsta* gender
+```
+
+I'm curious about satisfaction with life.
+
+Does marital status plays a role? Does gender?
+
+Let's do some plots
 
 ```
-tsline psoy
+egen temp = rowtotal(marsta*)
+gen marsta0 = 1-temp
+label variable marsta0 "Forever alone" /* XD */
+drop temp
 ```
 ```s/
-    quietly tsline psoy
-    quietly graph export psoy.png, width(500) replace
+    quietly egen temp = rowtotal(marsta*)
+    quietly gen marsta0 = 1-temp
+    quietly label variable marsta0 "Forever alone" /* XD */
+    quietly drop temp
 ```
 
-![Soy spot price in Chicago (USD/MT)](psoy.png)
-
-The above time series si not stationary at all. So we apply logaritmic difference:
+Now a cool loop
 ```
-gen lns=ln(psoy)
-gen dlns=D.lns
-tsline dlns
+forvalues k = 0(1)4{
+  local titulo : variable label marsta`k'
+  twoway (histogram satlif if gender==1 & marsta`k'==1, bin(5) color(red%30)) ///        
+       (histogram satlif if gender==0 & marsta`k'==1, bin(5) color(green%30)), ///   
+        name(H_`k') title("`titulo'") legend(order(1 "Male" 2 "Female" ))
+}
+quietly graph dir H_*
+grc1leg `r(list)', l1(Density) legendfrom(H_1)
+graph close H_*
 ```
 ```s/
-    quietly gen lns=ln(psoy)
-    quietly gen dlns=D.lns
-    quietly tsline dlns
-    quietly graph export dlns.png, width(500) replace
+    forvalues k = 0(1)4{
+    local titulo : variable label marsta`k'
+    twoway (histogram satlif if gender==1 & marsta`k'==1, bin(5) color(red%30)) ///        
+          (histogram satlif if gender==0 & marsta`k'==1, bin(5) color(green%30)), ///   
+            name(H_`k') title("`titulo'") legend(order(1 "Male" 2 "Female" ))
+    }
+    quietly graph dir H_*
+    grc1leg `r(list)', l1(Density) legendfrom(H_1)
+    quietly graph export multi_hist.png, width(500) replace
+    graph close H_*
 ```
-![$\Delta$ln(psoy)](dlns.png)
 
-Is it auto correlated?
+![Multiple overlayed histograms](multi_hist.png)
+
+It looks interesting...
+
+Another interesting looking thing, is the variable:
+```s
+    describe hhpres
 ```
-corrgram dlns, lags(12)
-ac dlns, lags(12)
-pac dlns, lags(12)
+
+Does it have a relationship with any variable?
+
+Let's see:
+```
+ds hhpres, not
+foreach v of varlist `r(varlist)' {
+	quietly ttest `v', by(hhpres)
+	if r(p)<0.01 {
+		display "`: var label `v''"
+	}
+}
 ```
 ```s/
-    quietly corrgram dlns, lags(12)
-    quietly ac dlns, lags(12)
-    quietly graph export ac.png, width(500) replace
-    quietly pac dlns, lags(12)
-    quietly graph export pac.png, width(500) replace
+    quietly ds hhpres, not
+    foreach v of varlist `r(varlist)' {
+	     quietly ttest `v', by(hhpres)
+	      if r(p)<0.01 {
+		        display "`: var label `v''"
+	      }
+    }
 ```
-![Correlogram (autocorrelation) of $\Delta$ln(psoy)](ac.png)
 
-![Correlograms(partial auto correlation) of $\Delta$ln(psoy)](pac.png)
+## SOME CODE LINES WITH THE GOOD OLD OLS
 
-Let's try to estimate an $AR(1)$
+Suppose that we want to explain a continuous variable using another continuous
+variable, so we don't have many options:
+```s
+    describe totexp monage htself tincm_r
 ```
-arima dlns, ar(1)
+```
+reg totexp monage
 ```
 ```s/
-    arima dlns, ar(1)
+    reg totexp monage
 ```
 
-Are its residuals white noise?
+Let's do bad things and over-fit the regression using a polynomial. In fact,
+let's see how R^2 changes while the degree of the polynomial rises.
 ```
-predict resid_ar1, resid
-wntestq resid_ar1
+matrix mat_r = J(10,2,.)
+forvalues k = 1(1)10{
+	quietly gen monage_`k' = monage^`k'
+	quietly ds monage_*
+	quietly reg totexp `r(varlist)'
+	quietly matrix mat_r[`k',2] = e(r2)
+	quietly matrix mat_r[`k',1] = `k'
+}
 ```
 ```s/
-    quietly predict resid_ar1, resid
-```
-```s/
-    wntestq resid_ar1
+    quietly matrix mat_r = J(10,2,.)
+    forvalues k = 1(1)10{
+	     quietly gen monage_`k' = monage^`k'
+	     quietly ds monage_*
+	     quietly reg totexp `r(varlist)'
+	     quietly matrix mat_r[`k',2] = e(r2)
+	     quietly matrix mat_r[`k',1] = `k'
+    }
 ```
 
-Let's se visually how acurate are the fitted values
 ```
-predict dlns_ar1
-tsline dlns dlns_ar1
+drop _all
+svmat double mat_r
+matrix drop mat_r
+twoway connected mat_r2 mat_r1, ytitle("R{sup:2}") xtitle("Polynomial degree")
+use russia, clear
 ```
 ```s/
-    quietly predict dlns_ar1
-    quietly tsline dlns dlns_ar1
-    quietly graph export dlns_ar1.png, width(500) replace
+    quietly drop _all
+    quietly svmat double mat_r
+    quietly matrix drop mat_r
+    quietly twoway connected mat_r2 mat_r1, ytitle("R{sup:2}") xtitle("Polynomial degree")
+    quietly graph export R2.png, width(500) replace
+    quietly use russia, clear
 ```
-![Observed vs Fitted](dlns_ar1.png)
 
-This code is just an example, in order to developed a
-better model one should follow the Box-Jenknis method.
+![Over-fitting and $R^2$](R2.png)
+
+To be continued...
+
+## LOGIT AND PROBIT
+
+
+
+## CLUSTERED STANDARD ERRORS
+
+
+
+```
+log close
+```
