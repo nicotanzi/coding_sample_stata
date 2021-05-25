@@ -244,8 +244,7 @@ variable name   type    format     label      variable label
 ─────────────────────────────────────────────────────────────────────────────
 hhpres          double  %10.0g                Others Present at Interview
 </pre>
-<p>Does it have a relationship with any variable?</p>
-<p>Let’s see:</p>
+<p>Does people that ansewred the questions with someone else close to have different answers to those who were alone? In which variables? Let’s see:</p>
 <pre><code>ds hhpres, not
 foreach v of varlist `r(varlist)&#39; {
     quietly ttest `v&#39;, by(hhpres)
@@ -253,7 +252,21 @@ foreach v of varlist `r(varlist)&#39; {
         display &quot;`: var label `v&#39;&#39;&quot;
     }
 }</code></pre>
-
+<pre class='stata'>
+Site
+Male
+Age (in months)
+Health Prob last 30 days
+Self-reported Height
+Ever Had Heart Attack
+Smokes
+Height
+HH Income Real
+Geographic Area
+Married
+Divorced
+Widowed
+</pre>
 <h2 id="some-code-lines-with-the-good-old-ols">SOME CODE LINES WITH THE GOOD OLD OLS</h2>
 <p>Suppose that we want to explain a continuous variable using another continuous variable, so we don’t have many options:</p>
 <pre class='stata'>. describe totexp monage htself tincm_r
@@ -268,29 +281,18 @@ tincm_r         double  %10.0g                HH Income Real
 </pre>
 <pre><code>reg totexp monage</code></pre>
 <pre class='stata'>      Source │       SS           df       MS      Number of obs   =     2,44
-
 ─────────────┼──────────────────────────────────   F(1, 2445)      =     86.4
-
        Model │  6.5927e+09         1  6.5927e+09   Prob > F        =    0.000
-
     Residual │  1.8652e+11     2,445  76284541.1   R-squared       =    0.034
-
 ─────────────┼──────────────────────────────────   Adj R-squared   =    0.033
-
        Total │  1.9311e+11     2,446  78948635.7   Root MSE        =    8734.
-
 ─────────────┬───────────────────────────────────────────────────────────────
--
      totexpr │      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval
-
 ─────────────┼───────────────────────────────────────────────────────────────
--
       monage │  -7.666014    .824627    -9.30   0.000    -9.283053   -6.04897
-
        _cons │   11921.72   491.9559    24.23   0.000     10957.03    12886.4
-
 ─────────────┴───────────────────────────────────────────────────────────────
--
+
 </pre>
 <p>Let’s do bad things and over-fit the regression using a polynomial. In fact, let’s see how R^2 changes while the degree of the polynomial rises.</p>
 <pre><code>quietly matrix mat_r = J(10,2,.)

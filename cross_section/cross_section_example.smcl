@@ -3,7 +3,7 @@
       name:  {res}<unnamed>
        {txt}log:  {res}D:\Trabajo\Coding Sample\coding_sample_stata\cross_section\cross_section_example.smcl
   {txt}log type:  {res}smcl
- {txt}opened on:  {res}25 May 2021, 17:02:52
+ {txt}opened on:  {res}25 May 2021, 17:26:43
 {txt}
 {com}. //_1
 . display c(current_date)
@@ -60,7 +60,25 @@ variable name   type    format     label      variable label
 {com}. //_7q
 . quietly ds hhpres, not
 {txt}
-{com}. quietly foreach v of varlist `r(varlist)' {c -(}
+{com}. foreach v of varlist `r(varlist)' {c -(}
+{txt}  2{com}.      quietly ttest `v', by(hhpres)
+{txt}  3{com}.       if r(p)<0.01 {c -(}
+{txt}  4{com}.             display "`: var label `v''"
+{txt}  5{com}.       {c )-}
+{txt}  6{com}. {c )-}
+Site
+Male
+Age (in months)
+Health Prob last 30 days
+Self-reported Height
+Ever Had Heart Attack
+Smokes
+Height
+HH Income Real
+Geographic Area
+Married
+Divorced
+Widowed
 {txt}
 {com}. //_8
 . describe totexp monage htself tincm_r
@@ -113,7 +131,7 @@ variable name   type    format     label      variable label
       {txt}name:  {res}<unnamed>
        {txt}log:  {res}D:\Trabajo\Coding Sample\coding_sample_stata\cross_section\cross_section_example.smcl
   {txt}log type:  {res}smcl
- {txt}closed on:  {res}25 May 2021, 17:03:12
+ {txt}closed on:  {res}25 May 2021, 17:27:04
 {txt}{.-}
 {smcl}
 {txt}{sf}{ul off}

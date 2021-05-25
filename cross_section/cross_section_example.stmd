@@ -81,8 +81,7 @@ Another interesting looking thing, is the variable:
     describe hhpres
 ```
 
-Does it have a relationship with any variable?
-
+Does people that ansewred the questions with someone else close to have different answers to those who were alone? In which variables?
 Let's see:
 ```
 ds hhpres, not
@@ -95,9 +94,9 @@ foreach v of varlist `r(varlist)' {
 ```
 ```s/
     quietly ds hhpres, not
-    quietly foreach v of varlist `r(varlist)' {
+    foreach v of varlist `r(varlist)' {
 	     quietly ttest `v', by(hhpres)
-	      quietly if r(p)<0.01 {
+	      if r(p)<0.01 {
 		        display "`: var label `v''"
 	      }
     }
